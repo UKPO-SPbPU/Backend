@@ -31,6 +31,8 @@ public class CRMController {
     private final CallsReportService callsReportService;
     private final CRMService crmService;
 
+    private final RestTemplate restTemplate;
+
     @Value("${crm-service.data-gen-service-url}")
     private String dataGenURL;
 
@@ -39,7 +41,7 @@ public class CRMController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<String> responseEntity = new RestTemplate().exchange(
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
                 dataGenURL,
                 HttpMethod.POST,
                 requestEntity,
@@ -112,7 +114,7 @@ public class CRMController {
     }
 
     @GetMapping("/tariff/{phoneNumber}")
-    public ResponseEntity<ClientTariffResponse> getAllTariffs(@PathVariable("phoneNumber") String phoneNumber) {
+    public ResponseEntity<ClientTariffResponse> getClientTariff(@PathVariable("phoneNumber") String phoneNumber) {
         return ResponseEntity.ok(crmService.getClientTariff(phoneNumber));
     }
 }

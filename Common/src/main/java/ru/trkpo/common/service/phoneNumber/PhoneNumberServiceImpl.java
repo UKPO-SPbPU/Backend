@@ -37,7 +37,7 @@ public class PhoneNumberServiceImpl implements PhoneNumberService {
             long clientNum = phoneNumberRepository.count();
             int pageNumber = (int)(Math.random() * clientNum);
             Page<PhoneNumber> page = phoneNumberRepository.findAll(PageRequest.of(pageNumber, 1));
-            if (! page.hasContent())
+            if (!page.hasContent())
                 return null;
             return page.getContent().get(0);
         });

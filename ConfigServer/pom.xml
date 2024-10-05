@@ -6,11 +6,11 @@
     <parent>
         <groupId>ru.trkpo</groupId>
         <artifactId>BillingSystemModel-Backend</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>ConfigServer</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>ConfigServer</name>
     <description>Spring cloud configuration server for billing system model microservices</description>
 
@@ -35,11 +35,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <image>
-                        <builder>paketobuildpacks/builder-jammy-base:latest</builder>
-                    </image>
-                </configuration>
             </plugin>
         </plugins>
     </build>

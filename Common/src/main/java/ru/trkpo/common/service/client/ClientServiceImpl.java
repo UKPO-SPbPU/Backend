@@ -15,12 +15,12 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client createNewClient(String[] fio) {
-        if (fio.length < 2)
+        if (fio.length < 2 || fio.length > 3)
             throw new NoDataFoundException("FIO field is empty");
         return Client.builder()
                 .id(null)
-                .firstName(fio[0])
-                .lastName(fio[1])
+                .firstName(fio[1])
+                .lastName(fio[0])
                 .patronymic(fio.length == 3 ? fio[2] : null)
                 .age(null)
                 .birthday(null)
@@ -49,5 +49,4 @@ public class ClientServiceImpl implements ClientService {
                 clientRepository.findByPhoneNumber(phoneNumber).isPresent()
         ));
     }
-
 }

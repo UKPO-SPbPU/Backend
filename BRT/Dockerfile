@@ -1,7 +1,7 @@
-FROM amazoncorretto:17.0.2-alpine
+FROM amazoncorretto:21-alpine
 LABEL description="Образ для микросервиса 'BRT'"
 
-ARG JAR_FILE=target/BRT-0.0.1.jar
+ARG JAR_FILE=target/BRT-0.0.1-SNAPSHOT.jar
 COPY $JAR_FILE BRT.jar
 RUN apk --no-cache add curl
 

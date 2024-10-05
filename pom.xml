@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>ru.trkpo</groupId>
     <artifactId>BillingSystemModel-Backend</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -26,13 +26,21 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <skipTests>false</skipTests>
+        <skipUnitTests>${skipTests}</skipUnitTests>
+        <skipIntegrationTests>${skipTests}</skipIntegrationTests>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-cloud.version>4.0.4</spring-cloud.version>
-        <spring-boot.version>3.1.5</spring-boot.version>
+        <spring-cloud.version>4.1.0</spring-cloud.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <jjwt.version>0.11.5</jjwt.version>
+        <jjwt.version>0.12.5</jjwt.version>
+        <postgres.version>42.7.1</postgres.version>
+        <jacoco.version>0.8.11</jacoco.version>
+        <h2.version>2.2.224</h2.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
+        <failsafe-plugin.version>3.2.5</failsafe-plugin.version>
     </properties>
 
 </project>
