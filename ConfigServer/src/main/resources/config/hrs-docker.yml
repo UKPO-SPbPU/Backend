@@ -1,0 +1,15 @@
+hrs-service:
+  port: ${HRS_PORT:8083}
+  servlet-context-path: /hrs
+
+  destination-queue:
+    tariffication: tariffication-mq
+    tariffication-request: tariffication-request-mq
+
+  services:
+    cdr-plus:
+      date-time-format: yyyy/MM/dd HH:mm:ss
+      source-url: "http://brt:${BRT_PORT:8082}/brt/files/cdr-plus.txt"
+
+    tariffication-report:
+      file-path: /home/files/tariffication-reports.txt

@@ -1,0 +1,173 @@
+version: '3.9'
+services:
+  postgresql:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_DB=${POSTGRESQL_DB}
+    ports:
+      - "${POSTGRESQL_PORT}:${POSTGRESQL_PORT}"
+    volumes:
+      - ./postgres-volume:/var/lib/postgresql/volumes
+    healthcheck:
+      test: "pg_isready -d ${POSTGRESQL_DB} -U ${POSTGRESQL_USER}"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - billing-system-network
+    restart: always
+
+  activemq-artemis:
+    build:
+      context: .
+      dockerfile: Dockerfile-apache-artemis
+    environment:
+      - ARTEMIS_USER=${AMQ_ARTEMIS_USER}
+      - ARTEMIS_PASSWORD=${AMQ_ARTEMIS_PASSWORD}
+    ports:
+      - "8161:8161"
+      - "${AMQ_ARTEMIS_PORT}:61616"
+    healthcheck:
+      test: "curl --silent --fail activemq-artemis:8161"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - billing-system-network
+    restart: always
+
+  config-server:
+    build:
+      context: ConfigServer
+      dockerfile: Dockerfile
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
+    env_file:
+      - .env
+    healthcheck:
+      test: "curl --silent --fail config-server:${CONFIG_SERVER_PORT}/actuator/health | grep UP || exit 1"
+      interval: 5s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
+    networks:
+      - billing-system-network
+    restart: always
+
+  data-gen:
+    build:
+      context: DataGen
+      dockerfile: Dockerfile
+    ports:
+      - "${DATA_GEN_PORT}:${DATA_GEN_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --silent --fail data-gen:${DATA_GEN_PORT}/data-gen/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - billing-system-network
+    restart: always
+    volumes:
+      - ./files:/home/files
+
+  brt:
+    build:
+      context: BRT
+      dockerfile: Dockerfile
+    ports:
+      - "${BRT_PORT}:${BRT_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      activemq-artemis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      data-gen:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --silent --fail brt:${BRT_PORT}/brt/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - billing-system-network
+    restart: always
+    volumes:
+      - ./files:/home/files
+
+  hrs:
+    build:
+      context: HRS
+      dockerfile: Dockerfile
+    ports:
+      - "${HRS_PORT}:${HRS_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      activemq-artemis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      brt:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --silent --fail hrs:${HRS_PORT}/hrs/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - billing-system-network
+    restart: always
+    volumes:
+      - ./files:/home/files
+
+  crm:
+    build:
+      context: CRM
+      dockerfile: Dockerfile
+    ports:
+      - "${CRM_PORT}:${CRM_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      activemq-artemis:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      brt:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --silent --fail crm:${CRM_PORT}/crm/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - billing-system-network
+    restart: always
+
+networks:
+  billing-system-network:
+    driver: bridge

@@ -1,0 +1,6 @@
+FROM apache/activemq-artemis:latest-alpine
+LABEL description="Образ для брокера сообщений 'Apache ActiveMQ Artemis'"
+
+USER root
+RUN apk --no-cache add curl
+USER artemis

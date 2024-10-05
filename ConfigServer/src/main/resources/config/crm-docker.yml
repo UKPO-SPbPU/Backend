@@ -1,0 +1,18 @@
+crm-service:
+  port: ${CRM_PORT:8080}
+  servlet-context-path: /crm
+
+  destination-queue:
+    tariffication: tariffication-mq
+
+  data-gen-service-url: "http://data-gen:${DATA_GEN_PORT}/data-gen/generate/cdr"
+
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000  # Сутки
+
+  date-time-format: ddMMyyyy
+
+  incoming-call-code: "02"
+
+  security-enabled: true
