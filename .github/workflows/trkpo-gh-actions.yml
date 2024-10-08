@@ -164,24 +164,26 @@ jobs:
           file: ./Dockerfile-apache-artemis
           context: .
 
-      # - name: Connect to VM via SSH and deploy Front
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: 84.201.170.120
-      #     username: romashov
-      #     key: ${{ env.KEY}}
-      #     passphrase: ${{ env.KEY_PHRASE }}
-      #     port: 22
-      #     script: |
-      #       echo ${{ env.OATH_KEY }} | docker login \
-      #         --username oauth \
-      #         --password-stdin \
-      #        cr.yandex
-      #       docker ps -a
-      #       if [ "$(docker ps -q -f name="front")" ]; then
-      #         docker rm -f front
-      #       fi
-      #       docker pull ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
-      #       sudo docker run --name front -dp 8080:8080 ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
-      #       docker image prune -a -f
-      #       docker container prune -f
+      - name: Connect to VM via SSH and deploy Front
+        uses: appleboy/ssh-action@master
+        with:
+          host: 84.201.170.120
+          username: romashov
+          key: ${{ env.KEY}}
+          passphrase: ${{ env.KEY_PHRASE }}
+          port: 22
+          script: |
+            export IMAGE_HASH=${{ github.sha }}
+            docker ps -a
+
+        # echo ${{ env.OATH_KEY }} | docker login \
+        #   --username oauth \
+        #   --password-stdin \
+        #  cr.yandex
+        # if [ "$(docker ps -q -f name="front")" ]; then
+        #   docker rm -f front
+        # fi
+        # docker pull ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
+        # sudo docker run --name front -dp 8080:8080 ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
+        # docker image prune -a -f
+        # docker container prune -f
