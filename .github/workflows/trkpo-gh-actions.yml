@@ -87,6 +87,9 @@ jobs:
         with:
           yc-sa-json-credentials: ${{ secrets.AUTHORISED_KEY }}
 
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+
       - name: Build and push BRT docker image to Yandex Container Registry
         id: build_push
         uses: docker/build-push-action@v4
