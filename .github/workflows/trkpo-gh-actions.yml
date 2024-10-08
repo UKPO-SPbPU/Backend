@@ -153,6 +153,17 @@ jobs:
           file: ./HRS/Dockerfile
           context: ./HRS
 
+      - name: Build and push Apache docker image to Yandex Container Registry
+        id: build_push_apache
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/apache-artemis:apache-artemis-build-${{ github.sha }}
+          file: ./Dockerfile-apache-artemis
+          context: .
+
       # - name: Connect to VM via SSH and deploy Front
       #   uses: appleboy/ssh-action@master
       #   with:

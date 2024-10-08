@@ -84,10 +84,10 @@ services:
       - ./files:/home/files
 
   brt:
-    # build:
-    #   context: BRT
-    #   dockerfile: Dockerfile
-    image: cr.yandex/crpnh1ma9g5si6u3fpsf/brt
+    build:
+      context: BRT
+      dockerfile: Dockerfile
+    # image: cr.yandex/crpnh1ma9g5si6u3fpsf/brt
     ports:
       - "${BRT_PORT}:${BRT_PORT}"
     env_file:
