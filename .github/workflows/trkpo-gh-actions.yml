@@ -78,40 +78,80 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Set up Docker buildx
-      #   uses: docker/setup-buildx-action@v1
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v1
 
-      # - name: Login (Yandex Cloud)
-      #   id: login-cr
-      #   uses: yc-actions/yc-cr-login@v1
-      #   with:
-      #     yc-sa-json-credentials: ${{ secrets.AUTHORISED_KEY }}
+      - name: Login (Yandex Cloud)
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.AUTHORISED_KEY }}
 
-      # - name: Set up JDK 21 for x64
-      #   uses: actions/setup-java@v4
-      #   with:
-      #     java-version: "21"
-      #     distribution: "temurin"
-      #     architecture: x64
-      #     cache: maven
+      - name: Set up JDK 21 for x64
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
 
-      # - name: Build with Maven
-      #   run: mvn clean install -DskipTests
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
 
-      # - name: Build and push BRT docker image to Yandex Container Registry
-      #   id: build_push
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     push: true
-      #     platforms: linux/amd64
-      #     provenance: false
-      #     tags: ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:brt-build-${{ github.sha }}
-      #     file: ./BRT/Dockerfile
-      #     context: ./BRT
-      #     env_file: .env
+      - name: Build and push BRT docker image to Yandex Container Registry
+        id: build_push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/brt:brt-build-${{ github.sha }}
+          file: ./BRT/Dockerfile
+          context: ./BRT
 
-      - name: OUT
-        run: printenv
+      - name: Build and push ConfigServer docker image to Yandex Container Registry
+        id: build_push_config_server
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/config-server:config-server-build-${{ github.sha }}
+          file: ./ConfigServer/Dockerfile
+          context: ./ConfigServer
+
+      - name: Build and push CRM docker image to Yandex Container Registry
+        id: build_push_crm
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/crm:crm-build-${{ github.sha }}
+          file: ./CRM/Dockerfile
+          context: ./CRM
+
+      - name: Build and push DataGen docker image to Yandex Container Registry
+        id: build_push_data-gen
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/data-gen:data-gen-build-${{ github.sha }}
+          file: ./DataGen/Dockerfile
+          context: ./DataGen
+
+      - name: Build and push HRS docker image to Yandex Container Registry
+        id: build_push_hrs
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/hrs:hrs-build-${{ github.sha }}
+          file: ./HRS/Dockerfile
+          context: ./HRS
 
       # - name: Connect to VM via SSH and deploy Front
       #   uses: appleboy/ssh-action@master
