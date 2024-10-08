@@ -5,66 +5,120 @@ on:
     branches:
       - main
       - dev
-  pull_request:
-    branches:
-      - master
-      - dev
 
 jobs:
-  build:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up JDK 21 for x64
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         java-version: "21"
+  #         distribution: "temurin"
+  #         architecture: x64
+  #         cache: maven
+
+  #     - name: Build with Maven
+  #       run: mvn clean install -DskipTests
+
+  # unit-tests:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up JDK 21 for x64
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         java-version: "21"
+  #         distribution: "temurin"
+  #         architecture: x64
+  #         cache: maven
+
+  #     - name: Unit Testing with Maven
+  #       run: mvn test
+
+  # integration-tests:
+  #   needs: unit-tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up JDK 21 for x64
+  #       uses: actions/setup-java@v4
+  #       with:
+  #         java-version: "21"
+  #         distribution: "temurin"
+  #         architecture: x64
+  #         cache: maven
+
+  #     - name: Build with Maven
+  #       run: mvn clean install -DskipTests
+
+  #     - name: Integration Testing with Maven
+  #       env:
+  #         JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
+  #       run: mvn verify
+
+  deploy:
+    # needs: integration-tests
     runs-on: ubuntu-latest
+    env:
+      CR_REGISTRY: ${{ secrets.CR_REGISTRY }}
+      CR_REPOSUTORY: ${{ secrets.CR_REPOSUTORY }}
+      KEY: ${{ secrets.KEY }}
+      KEY_PHRASE: ${{ secrets.KEY_PHRASE }}
+      OATH_KEY: ${{ secrets.OATH_KEY }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 21 for x64
-        uses: actions/setup-java@v4
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login (Yandex Cloud)
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v1
         with:
-          java-version: "21"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
+          yc-sa-json-credentials: ${{ secrets.AUTHORISED_KEY }}
 
-      - name: Build with Maven
-        run: mvn clean install -DskipTests
-
-  unit-tests:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21 for x64
-        uses: actions/setup-java@v4
+      - name: Build and push BRT docker image to Yandex Container Registry
+        id: build_push
+        uses: docker/build-push-action@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:brt-build-${{ github.sha }}
+          file: ./BRT/Dockerfile
+          context: ./BRT
 
-      - name: Unit Testing with Maven
-        run: mvn test
+      - name: OUT
+        run: echo ${POSTGRESQL_PORT}
 
-  integration-tests:
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21 for x64
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
-
-      - name: Build with Maven
-        run: mvn clean install -DskipTests
-
-      - name: Integration Testing with Maven
-        env:
-          JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
-        run: mvn verify
+      # - name: Connect to VM via SSH and deploy Front
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: 84.201.170.120
+      #     username: romashov
+      #     key: ${{ env.KEY}}
+      #     passphrase: ${{ env.KEY_PHRASE }}
+      #     port: 22
+      #     script: |
+      #       echo ${{ env.OATH_KEY }} | docker login \
+      #         --username oauth \
+      #         --password-stdin \
+      #        cr.yandex
+      #       docker ps -a
+      #       if [ "$(docker ps -q -f name="front")" ]; then
+      #         docker rm -f front
+      #       fi
+      #       docker pull ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
+      #       sudo docker run --name front -dp 8080:8080 ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
+      #       docker image prune -a -f
+      #       docker container prune -f
