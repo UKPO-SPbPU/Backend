@@ -173,6 +173,7 @@ jobs:
           passphrase: ${{ env.KEY_PHRASE }}
           port: 22
           script: |
+            cd ./ukpo
             docker compose down
             export IMAGE_HASH=${{ github.sha }}
             docker ps -a
