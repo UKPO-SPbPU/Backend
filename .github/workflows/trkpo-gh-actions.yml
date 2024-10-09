@@ -164,7 +164,7 @@ jobs:
           file: ./Dockerfile-apache-artemis
           context: .
 
-      - name: Connect to VM via SSH and deploy Front
+      - name: Connect to VM via SSH and deploy Backend
         uses: appleboy/ssh-action@master
         with:
           host: 84.201.170.120
@@ -173,17 +173,12 @@ jobs:
           passphrase: ${{ env.KEY_PHRASE }}
           port: 22
           script: |
+            docker compose down
             export IMAGE_HASH=${{ github.sha }}
             docker ps -a
-
-        # echo ${{ env.OATH_KEY }} | docker login \
-        #   --username oauth \
-        #   --password-stdin \
-        #  cr.yandex
-        # if [ "$(docker ps -q -f name="front")" ]; then
-        #   docker rm -f front
-        # fi
-        # docker pull ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
-        # sudo docker run --name front -dp 8080:8080 ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSUTORY }}:front-build-${{ github.sha }}
-        # docker image prune -a -f
-        # docker container prune -f
+            echo ${IMAGE_HASH}
+            echo ${{ env.OATH_KEY }} | docker login \
+              --username oauth \
+              --password-stdin \
+            cr.yandex
+            docker compose up -d
