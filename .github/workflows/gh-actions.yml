@@ -152,6 +152,7 @@ jobs:
             cd ./ukpo
             docker compose down
             export IMAGE_HASH=${{ github.sha }}
+            docker ps -a
             echo ${IMAGE_HASH}
             echo ${{ env.OATH_KEY }} | docker login \
               --username oauth \
